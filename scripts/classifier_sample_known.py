@@ -5,8 +5,8 @@ numpy array. This can be used to produce samples for FID evaluation.
 import matplotlib.pyplot as plt
 import argparse
 import os
-from visdom import Visdom
-viz = Visdom(port=8850)
+# from visdom import Visdom
+# viz = Visdom(port=8850)
 import sys
 sys.path.append("..")
 sys.path.append(".")
@@ -115,13 +115,13 @@ def main():
           if img[2]==0:
               continue    #take only diseased images as input
               
-          viz.image(visualize(img[0][0, 0, ...]), opts=dict(caption="img input 0"))
-          viz.image(visualize(img[0][0, 1, ...]), opts=dict(caption="img input 1"))
-          viz.image(visualize(img[0][0, 2, ...]), opts=dict(caption="img input 2"))
-          viz.image(visualize(img[0][0, 3, ...]), opts=dict(caption="img input 3"))
-          viz.image(visualize(img[3][0, ...]), opts=dict(caption="ground truth"))
+        #   viz.image(visualize(img[0][0, 0, ...]), opts=dict(caption="img input 0"))
+        #   viz.image(visualize(img[0][0, 1, ...]), opts=dict(caption="img input 1"))
+        #   viz.image(visualize(img[0][0, 2, ...]), opts=dict(caption="img input 2"))
+        #   viz.image(visualize(img[0][0, 3, ...]), opts=dict(caption="img input 3"))
+        #   viz.image(visualize(img[3][0, ...]), opts=dict(caption="ground truth"))
         else:
-          viz.image(visualize(img[0][0, ...]), opts=dict(caption="img input"))
+        #   viz.image(visualize(img[0][0, ...]), opts=dict(caption="img input"))
           print('img1', img[1])
           number=img[1]["path"]
           print('number', number)
@@ -156,18 +156,18 @@ def main():
         print('time for 1000', start.elapsed_time(end))
 
         if args.dataset=='brats':
-          viz.image(visualize(sample[0,0, ...]), opts=dict(caption="sampled output0"))
-          viz.image(visualize(sample[0,1, ...]), opts=dict(caption="sampled output1"))
-          viz.image(visualize(sample[0,2, ...]), opts=dict(caption="sampled output2"))
-          viz.image(visualize(sample[0,3, ...]), opts=dict(caption="sampled output3"))
+        #   viz.image(visualize(sample[0,0, ...]), opts=dict(caption="sampled output0"))
+        #   viz.image(visualize(sample[0,1, ...]), opts=dict(caption="sampled output1"))
+        #   viz.image(visualize(sample[0,2, ...]), opts=dict(caption="sampled output2"))
+        #   viz.image(visualize(sample[0,3, ...]), opts=dict(caption="sampled output3"))
           difftot=abs(org[0, :4,...]-sample[0, ...]).sum(dim=0)
-          viz.heatmap(visualize(difftot), opts=dict(caption="difftot"))
+        #   viz.heatmap(visualize(difftot), opts=dict(caption="difftot"))
           
         elif args.dataset=='chexpert':
-          viz.image(visualize(sample[0, ...]), opts=dict(caption="sampled output"+str(name)))
+        #   viz.image(visualize(sample[0, ...]), opts=dict(caption="sampled output"+str(name)))
           diff=abs(visualize(org[0, 0,...])-visualize(sample[0,0, ...]))
           diff=np.array(diff.cpu())
-          viz.heatmap(np.flipud(diff), opts=dict(caption="diff"))
+        #   viz.heatmap(np.flipud(diff), opts=dict(caption="diff"))
 
 
         gathered_samples = [th.zeros_like(sample) for _ in range(dist.get_world_size())]

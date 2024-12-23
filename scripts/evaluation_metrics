@@ -1,6 +1,6 @@
 
-from visdom import Visdom
-viz = Visdom(port=8850)
+# from visdom import Visdom
+# viz = Visdom(port=8850)
 from sklearn.metrics import roc_auc_score
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,7 +27,7 @@ difftot=abs(original-healthyreconstruction).sum(dim=0)
 diff = np.array(difftot)
 thresh = threshold_otsu(diff)
 mask = th.where(th.tensor(diff) > thresh, 1, 0)  #this is our predicted binary segmentation
-viz.image(visualize(mask[ 0,...]), opts=dict(caption="mask"))
+# viz.image(visualize(mask[ 0,...]), opts=dict(caption="mask"))
 
 #We load the ground truth segmetation mask and put all the different tumor labels to 1:
 
