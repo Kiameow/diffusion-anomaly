@@ -47,7 +47,11 @@ class BRATSDataset(torch.utils.data.Dataset):
         number=filedict['t1'].split('/')[4]
         for seqtype in self.seqtypes:
             nib_img = nibabel.load(filedict[seqtype])
-            out.append(torch.tensor(nib_img.get_fdata()))
+            data = nib_img.get_fdata()
+            if data.shape[-1] == 1:
+                data = np.squeeze(data, axis=-1)
+            out.append(torch.tensor(data))
+
         out = torch.stack(out)
         out_dict = {}
         if self.test_flag:
@@ -56,6 +60,8 @@ class BRATSDataset(torch.utils.data.Dataset):
 
             seg=nibabel.load(path2)
             seg=seg.get_fdata()
+            if seg.shape[-1] == 1:
+                seg = np.squeeze(seg, axis=-1)
             image = torch.zeros(4, 256, 256)
             image[:, 8:-8, 8:-8] = out
             label = seg[None, ...]
