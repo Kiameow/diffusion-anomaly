@@ -898,7 +898,7 @@ class EncoderUNetModel(nn.Module):
             h = module(h, emb)
             if self.pool.startswith("spatial"):
                 results.append(h.type(x.dtype).mean(dim=(2, 3)))
-        h = self.middle_block(h, emb
+        h = self.middle_block(h, emb)
     
         if self.pool.startswith("spatial"):
             results.append(h.type(x.dtype).mean(dim=(2, 3)))
