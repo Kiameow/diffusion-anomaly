@@ -3,7 +3,7 @@ import torch.nn
 import numpy as np
 import os
 import os.path
-import nibabel
+import numpy as np
 from scipy import ndimage
 
 class BRATSDataset(torch.utils.data.Dataset):
@@ -18,8 +18,8 @@ class BRATSDataset(torch.utils.data.Dataset):
                   seg is supposed to contain the segmentation
         '''
         super().__init__()
-        self.directory = os.path.expanduser(directory)
-
+        self.directory = os.path.expanduser(directory) # full absolute path
+        # cd /mntcephfs/lab_data/wangcm/panyongjia/dataset/test/number
         self.test_flag=test_flag
         if test_flag:
             self.seqtypes = ['t1', 't1ce', 't2', 'flair']
@@ -44,28 +44,30 @@ class BRATSDataset(torch.utils.data.Dataset):
     def __getitem__(self, x):
         out = []
         filedict = self.database[x]
-        number=filedict['t1'].split('/')[4]
+        number=filedict['t1'].split('/')[6] 
         for seqtype in self.seqtypes:
-            nib_img = nibabel.load(filedict[seqtype])
-            data = nib_img.get_fdata()
-            if data.shape[-1] == 1:
-                data = np.squeeze(data, axis=-1)
-            out.append(torch.tensor(data))
+            data = np.load(filedict[seqtype])
+            data_max = np.max(data)
+            data_min = np.min(data)
+            normalized = (data - data_min) / (data_max - data_min)
+            if normalized.shape[-1] == 1:
+                normalized = np.squeeze(normalized, axis=-1)
+            out.append(torch.tensor(normalized))
 
         out = torch.stack(out)
         out_dict = {}
         if self.test_flag:
-            path2 = './data/brats/test_labels/' + str(
-                number) + '-label.nii.gz'
-
-            seg=nibabel.load(path2)
-            seg=seg.get_fdata()
-            if seg.shape[-1] == 1:
-                seg = np.squeeze(seg, axis=-1)
+            path2 = filedict['t1'].replace('t1', 'seg')
+            seg=np.load(path2)
+            seg_max = np.max(seg)
+            seg_min = np.min(seg)
+            normalized_seg = (seg - seg_min) / (seg_max - seg_min)
+            if normalized_seg.shape[-1] == 1:
+                normalized_seg = np.squeeze(normalized_seg, axis=-1)
             image = torch.zeros(4, 256, 256)
             image[:, 8:-8, 8:-8] = out
-            label = seg[None, ...]
-            if seg.max() > 0:
+            label = normalized_seg[None, ...]
+            if normalized_seg.max() > 0:
                 weak_label = 1
             else:
                 weak_label = 0
