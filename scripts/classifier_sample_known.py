@@ -181,6 +181,10 @@ def main():
             dist.all_gather(gathered_labels, classes)
             all_labels.extend([labels.cpu().numpy() for labels in gathered_labels])
 
+        logger.log("-----------")
+        logger.log(img[1])
+        logger.log(img[1]["seg_path"])
+        logger.log(img)
         seg_path = img[1]["seg_path"]
         metrics = save_validation_results(
             sample, 
