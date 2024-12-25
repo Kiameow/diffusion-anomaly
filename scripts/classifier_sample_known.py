@@ -250,7 +250,7 @@ def save_validation_results(sample, org, seg_path, number, output_dir, dataset_t
     if dataset_type == 'brats':
         os.makedirs(output_dir + f"/{number}", exist_ok=True)
         # Calculate difference map
-        diff = np.abs(org_np[0, :5, ...] - sample_np[0, ...]).sum(axis=0)
+        diff = np.abs(org_np[0, :4, ...] - sample_np[0, ...]).sum(axis=0)
         # Get segmentation mask (assuming it's in org_np[0, -1, ...])
         seg_mask = np.load(seg_path)
         max = np.max(seg_mask)
@@ -264,6 +264,8 @@ def save_validation_results(sample, org, seg_path, number, output_dir, dataset_t
         seg_image[:,8:-8,8:-8]=seg_mask
         # Calculate dice between difference map and segmentation
         dice_score = calculate_dice(diff, seg_image)
+
+        np.squeeze(seg_img)
         
         # Save visualizations
         diff_img = visualize(diff)
