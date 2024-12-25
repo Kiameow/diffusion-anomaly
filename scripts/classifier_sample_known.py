@@ -253,30 +253,20 @@ def save_validation_results(sample, org, seg_path, number, output_dir, dataset_t
         diff = np.abs(org_np[0, :4, ...] - sample_np[0, ...]).sum(axis=0)
         # Get segmentation mask (assuming it's in org_np[0, -1, ...])
         seg_mask = np.load(seg_path)
-        max = np.max(seg_mask)
-        min = np.min(seg_mask)
-        if max - min < 1e-6:
-            seg_mask = np.zeros_like(seg_mask)
-        else:
-            seg_mask = (seg_mask - min)  / (max - min)
+        seg_img = visualize(seg_mask)
+        seg_img = np.squeeze(seg_img);
         
-        seg_image = np.zeros((1,256,256))
-        seg_image[:,8:-8,8:-8]=seg_mask
+        seg_image = np.zeros((256,256))
+        seg_image[8:-8,8:-8]=seg_mask
         # Calculate dice between difference map and segmentation
         dice_score = calculate_dice(diff, seg_image)
-
-        print("-------------#######-----------")
-        print(diff.shape)
-        print(seg_image.shape)
         
         # Save visualizations
         diff_img = visualize(diff)
-        seg_img = visualize(seg_image)
-        print(seg_img.shape)
-        print((seg_img*255).shape)
+
         Image.fromarray((diff_img * 255).astype(np.uint8)).save(
             os.path.join(output_dir, number, f"{number}_difference.png"))
-        Image.fromarray((seg_img * 255).astype(np.uint8)).save(
+        Image.fromarray((seg_image * 255).astype(np.uint8)).save(
             os.path.join(output_dir, number, f"{number}_segmentation.png"))
         
         # Save metrics
