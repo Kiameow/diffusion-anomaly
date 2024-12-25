@@ -260,7 +260,7 @@ def save_validation_results(sample, org, seg_path, number, output_dir, dataset_t
         else:
             seg_mask = (seg_mask - min)  / (max - min)
         
-        seg_image = np.zeros(1,256,256)
+        seg_image = np.zeros((1,256,256))
         seg_image[:,8:-8,8:-8]=seg_mask
         # Calculate dice between difference map and segmentation
         dice_score = calculate_dice(diff, seg_image)
