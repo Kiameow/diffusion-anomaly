@@ -266,12 +266,14 @@ def save_validation_results(sample, org, seg_path, number, output_dir, dataset_t
         dice_score = calculate_dice(diff, seg_image)
 
         print("-------------#######-----------")
-        print(diff)
-        print(seg_image)
+        print(diff.shape)
+        print(seg_image.shape)
         
         # Save visualizations
         diff_img = visualize(diff)
         seg_img = visualize(seg_image)
+        print(seg_img.shape)
+        print((seg_img*255).shape)
         Image.fromarray((diff_img * 255).astype(np.uint8)).save(
             os.path.join(output_dir, number, f"{number}_difference.png"))
         Image.fromarray((seg_img * 255).astype(np.uint8)).save(
