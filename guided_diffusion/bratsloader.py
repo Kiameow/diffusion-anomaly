@@ -22,7 +22,7 @@ class BRATSDataset(torch.utils.data.Dataset):
         # cd /mntcephfs/lab_data/wangcm/panyongjia/dataset/test/number
         self.test_flag=test_flag
         if test_flag:
-            self.seqtypes = ['t1', 't1ce', 't2', 'flair']
+            self.seqtypes = ['t1', 't1ce', 't2', 'flair', 'seg']
         else:
             self.seqtypes = ['t1', 't1ce', 't2', 'flair', 'seg']
 
