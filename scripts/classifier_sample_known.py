@@ -43,20 +43,21 @@ def main():
         **args_to_dict(args, model_and_diffusion_defaults().keys())
     )
     if args.dataset=='brats':
-      ds = BRATSDataset(args.data_dir, test_flag=True)
-      datal = th.utils.data.DataLoader(
-        ds,
-        batch_size=args.batch_size,
-        shuffle=False)
+        ds = BRATSDataset(args.data_dir, test_flag=True)
+        datal = th.utils.data.DataLoader(
+            ds,
+            batch_size=args.batch_size,
+            shuffle=False
+        )
     
     elif args.dataset=='chexpert':
-     data = load_data(
-         data_dir=args.data_dir,
-         batch_size=args.batch_size,
-         image_size=args.image_size,
-         class_cond=True,
-     )
-     datal = iter(data)
+        data = load_data(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            image_size=args.image_size,
+            class_cond=True,
+        )
+        datal = iter(data)
    
     model.load_state_dict(
         dist_util.load_state_dict(args.model_path, map_location="cpu")
@@ -103,16 +104,16 @@ def main():
     logger.log("sampling...")
     all_images = []
     all_labels = []
+    all_metrics = []
 
-    for img in datal:
+    for idx, img in enumerate(datal):
 
         model_kwargs = {}
-        number = ''
      #   img = next(data)  # should return an image from the dataloader "data"
         print('img', img[0].shape, img[1])
         if args.dataset=='brats':
           Labelmask = th.where(img[3] > 0, 1, 0)
-          number=img[4][0]
+          number = f"{str(idx).zfill(4)}"
           if img[2]==0:
               continue    #take only diseased images as input
               
@@ -181,13 +182,14 @@ def main():
             dist.all_gather(gathered_labels, classes)
             all_labels.extend([labels.cpu().numpy() for labels in gathered_labels])
 
-        save_validation_results(
+        metrics = save_validation_results(
             sample, 
             org, 
             number,  # Already defined in your code
             output_dir="../validation_results",
             dataset_type=args.dataset
         )
+        all_metrics.append(metrics)
 
     arr = np.concatenate(all_images, axis=0)
     arr = arr[: args.num_samples]
@@ -195,7 +197,12 @@ def main():
         label_arr = np.concatenate(all_labels, axis=0)
         label_arr = label_arr[: args.num_samples]
     
+    total_dice_score = sum(metric['dice_score'] for metric in all_metrics)
+    num_metrics = len(all_metrics)
+    average_dice_score = total_dice_score / num_metrics if num_metrics > 0 else 0
 
+    logger.log("Average Dice Score:", average_dice_score)
+    np.save(os.path.join(args.output_dir, "all_metrics.npy"), all_metrics)
     dist.barrier()
     logger.log("sampling complete")
 
@@ -220,47 +227,49 @@ def create_argparser():
     add_dict_to_argparser(parser, defaults)
     return parser
 
+def calculate_dice(pred, target):
+    """Calculate Dice coefficient between prediction and target masks"""
+    smooth = 1e-5
+    pred = pred > 0.5  # Convert difference map to binary mask with threshold
+    target = target > 0  # Binary segmentation mask
+    intersection = (pred & target).sum()
+    return (2. * intersection + smooth) / (pred.sum() + target.sum() + smooth)
+
 def save_validation_results(sample, org, number, output_dir, dataset_type='brats'):
-    """Save validation results to disk"""
+    """Save validation results with anomaly detection dice score"""
     import os
     import numpy as np
     from PIL import Image
     
     os.makedirs(output_dir, exist_ok=True)
     
-    # Convert to numpy and normalize for visualization
     sample_np = sample.cpu().numpy()
     org_np = org.cpu().numpy()
     
-    # Save original and generated samples
-    for i in range(sample_np.shape[1]):  # For each channel
-        # Save generated sample
-        sample_img = visualize(sample_np[0, i, ...])
-        Image.fromarray((sample_img * 255).astype(np.uint8)).save(
-            os.path.join(output_dir, f"{number}_sample_channel_{i}.png")
-        )
-        
-        # Save original
-        org_img = visualize(org_np[0, i, ...])
-        Image.fromarray((org_img * 255).astype(np.uint8)).save(
-            os.path.join(output_dir, f"{number}_original_channel_{i}.png")
-        )
-    
-    # Save difference map
     if dataset_type == 'brats':
+        # Calculate difference map
         diff = np.abs(org_np[0, :4, ...] - sample_np[0, ...]).sum(axis=0)
-    else:  # chexpert
-        diff = np.abs(visualize(org_np[0, 0, ...]) - visualize(sample_np[0, 0, ...]))
+        # Get segmentation mask (assuming it's in org_np[0, -1, ...])
+        seg_mask = org_np[0, -1, ...]
+        # Calculate dice between difference map and segmentation
+        dice_score = calculate_dice(diff, seg_mask)
+        
+        # Save visualizations
+        diff_img = visualize(diff)
+        seg_img = visualize(seg_mask)
+        Image.fromarray((diff_img * 255).astype(np.uint8)).save(
+            os.path.join(output_dir, number, f"{number}_difference.png"))
+        Image.fromarray((seg_img * 255).astype(np.uint8)).save(
+            os.path.join(output_dir, number, f"{number}_segmentation.png"))
+        
+        # Save metrics
+        metrics = {
+            'dice_score': dice_score,
+            'number': number
+        }
+        np.save(os.path.join(output_dir, number, f"{number}_metrics.npy"), metrics)
     
-    diff_img = visualize(diff)
-    Image.fromarray((diff_img * 255).astype(np.uint8)).save(
-        os.path.join(output_dir, f"{number}_difference.png")
-    )
-    
-    # Save raw arrays for further analysis
-    np.save(os.path.join(output_dir, f"{number}_sample.npy"), sample_np)
-    np.save(os.path.join(output_dir, f"{number}_original.npy"), org_np)
-    np.save(os.path.join(output_dir, f"{number}_difference.npy"), diff)
+    return metrics
 
 if __name__ == "__main__":
     main()
