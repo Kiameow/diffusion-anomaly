@@ -181,11 +181,7 @@ def main():
             dist.all_gather(gathered_labels, classes)
             all_labels.extend([labels.cpu().numpy() for labels in gathered_labels])
 
-        print("-----########------")
-        print(img[1])
-        print(img[1]["seg_path"])
-        print(img)
-        seg_path = img[1]["seg_path"]
+        seg_path = img[1]["seg_path"][0]
         metrics = save_validation_results(
             sample, 
             org, 
