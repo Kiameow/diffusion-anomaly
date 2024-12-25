@@ -74,7 +74,7 @@ class BRATSDataset(torch.utils.data.Dataset):
 
             if seg.shape[-1] == 1:
                 seg = np.squeeze(seg, axis=-1)
-            image = torch.zeros(5, 256, 256)
+            image = torch.zeros(4, 256, 256)
             image[:, 8:-8, 8:-8] = out
             label = seg[None, ...]
             if seg.max() > 0:
