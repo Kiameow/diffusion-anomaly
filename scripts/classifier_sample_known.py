@@ -247,6 +247,7 @@ def save_validation_results(sample, org, number, output_dir, dataset_type='brats
     org_np = org.cpu().numpy()
     
     if dataset_type == 'brats':
+        os.makedirs(output_dir + f"/{number}", exist_ok=True)
         # Calculate difference map
         diff = np.abs(org_np[0, :4, ...] - sample_np[0, ...]).sum(axis=0)
         # Get segmentation mask (assuming it's in org_np[0, -1, ...])
