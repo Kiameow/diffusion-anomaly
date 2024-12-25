@@ -142,7 +142,7 @@ def main():
         start.record()
         sample, x_noisy, org = sample_fn(
             model_fn,
-            (args.batch_size, 4, args.image_size, args.image_size), img, org=img,
+            (args.batch_size, 5, args.image_size, args.image_size), img, org=img,
             clip_denoised=args.clip_denoised,
             model_kwargs=model_kwargs,
             cond_fn=cond_fn,
