@@ -22,7 +22,7 @@ class BRATSDataset(torch.utils.data.Dataset):
         # cd /mntcephfs/lab_data/wangcm/panyongjia/dataset/test/number
         self.test_flag=test_flag
         if test_flag:
-            self.seqtypes = ['t1', 't1ce', 't2', 'flair', 'seg']
+            self.seqtypes = ['t1', 't1ce', 't2', 'flair']
         else:
             self.seqtypes = ['t1', 't1ce', 't2', 'flair', 'seg']
 
@@ -37,8 +37,8 @@ class BRATSDataset(torch.utils.data.Dataset):
                 for f in files:
                     seqtype = f.split('_')[3]
                     datapoint[seqtype] = os.path.join(root, f)
-                assert set(datapoint.keys()) == self.seqtypes_set, \
-                    f'datapoint is incomplete, keys are {datapoint.keys()}'
+                # assert set(datapoint.keys()) == self.seqtypes_set, \
+                #     f'datapoint is incomplete, keys are {datapoint.keys()}'
                 self.database.append(datapoint)
 
     def __getitem__(self, x):
