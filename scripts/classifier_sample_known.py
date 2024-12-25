@@ -265,7 +265,9 @@ def save_validation_results(sample, org, seg_path, number, output_dir, dataset_t
         # Calculate dice between difference map and segmentation
         dice_score = calculate_dice(diff, seg_image)
 
-        np.squeeze(seg_image)
+        print("-------------#######-----------")
+        print(diff)
+        print(seg_image)
         
         # Save visualizations
         diff_img = visualize(diff)
