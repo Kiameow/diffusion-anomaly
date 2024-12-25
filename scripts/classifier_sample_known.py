@@ -211,7 +211,8 @@ def create_argparser():
         classifier_path="",
         classifier_scale=100,
         noise_level=500,
-        dataset='brats'
+        dataset='brats',
+        output_dir='./validation_results'
     )
     defaults.update(model_and_diffusion_defaults())
     defaults.update(classifier_defaults())
