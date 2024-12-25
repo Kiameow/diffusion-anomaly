@@ -22,7 +22,7 @@ class BRATSDataset(torch.utils.data.Dataset):
         # cd /mntcephfs/lab_data/wangcm/panyongjia/dataset/test/number
         self.test_flag=test_flag
         if test_flag:
-            self.seqtypes = ['t1', 't1ce', 't2', 'flair', 'seg']
+            self.seqtypes = ['t1', 't1ce', 't2', 'flair']
         else:
             self.seqtypes = ['t1', 't1ce', 't2', 'flair', 'seg']
 
@@ -62,7 +62,7 @@ class BRATSDataset(torch.utils.data.Dataset):
         out = torch.stack(out)
         out_dict = {}
         if self.test_flag:
-            path2 = filedict['seg']
+            path2 = filedict['t1'].replace('t1', 'seg')
             seg=np.load(path2)
             seg_max = np.max(seg)
             seg_min = np.min(seg)
@@ -82,6 +82,7 @@ class BRATSDataset(torch.utils.data.Dataset):
             else:
                 weak_label = 0
             out_dict["y"]=weak_label
+            out_dict["seg_path"]=path2
         else:
             image = torch.zeros(4,256,256)
             image[:,8:-8,8:-8]=out[:-1,...]		#pad to a size of (256,256)
@@ -92,7 +93,7 @@ class BRATSDataset(torch.utils.data.Dataset):
                 weak_label=0
             out_dict["y"] = weak_label
 
-        return (image, out_dict, weak_label, label, number )
+        return (image, out_dict, weak_label, label, number)
 
     def __len__(self):
         return len(self.database)

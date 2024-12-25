@@ -142,7 +142,7 @@ def main():
         start.record()
         sample, x_noisy, org = sample_fn(
             model_fn,
-            (args.batch_size, 5, args.image_size, args.image_size), img, org=img,
+            (args.batch_size, 4, args.image_size, args.image_size), img, org=img,
             clip_denoised=args.clip_denoised,
             model_kwargs=model_kwargs,
             cond_fn=cond_fn,
@@ -181,9 +181,11 @@ def main():
             dist.all_gather(gathered_labels, classes)
             all_labels.extend([labels.cpu().numpy() for labels in gathered_labels])
 
+        seg_path = img[1]["seg_path"]
         metrics = save_validation_results(
             sample, 
             org, 
+            seg_path,
             number,  # Already defined in your code
             output_dir="../validation_results",
             dataset_type=args.dataset
@@ -234,7 +236,7 @@ def calculate_dice(pred, target):
     intersection = (pred & target).sum()
     return (2. * intersection + smooth) / (pred.sum() + target.sum() + smooth)
 
-def save_validation_results(sample, org, number, output_dir, dataset_type='brats'):
+def save_validation_results(sample, org, seg_path, number, output_dir, dataset_type='brats'):
     """Save validation results with anomaly detection dice score"""
     import os
     import numpy as np
@@ -250,7 +252,7 @@ def save_validation_results(sample, org, number, output_dir, dataset_type='brats
         # Calculate difference map
         diff = np.abs(org_np[0, :5, ...] - sample_np[0, ...]).sum(axis=0)
         # Get segmentation mask (assuming it's in org_np[0, -1, ...])
-        seg_mask = org_np[0, -1, ...]
+        seg_mask = np.load(seg_path)
         # Calculate dice between difference map and segmentation
         dice_score = calculate_dice(diff, seg_mask)
         
