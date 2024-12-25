@@ -107,7 +107,7 @@ def main():
     for img in datal:
 
         model_kwargs = {}
-        number
+        number = ''
      #   img = next(data)  # should return an image from the dataloader "data"
         print('img', img[0].shape, img[1])
         if args.dataset=='brats':
