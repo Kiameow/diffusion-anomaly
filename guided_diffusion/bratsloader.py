@@ -49,10 +49,15 @@ class BRATSDataset(torch.utils.data.Dataset):
             data = np.load(filedict[seqtype])
             data_max = np.max(data)
             data_min = np.min(data)
-            normalized = (data - data_min) / (data_max - data_min)
-            if normalized.shape[-1] == 1:
-                normalized = np.squeeze(normalized, axis=-1)
-            out.append(torch.tensor(normalized))
+            data_leap = data_max - data_min
+            if data_leap > 1e-6:
+                data = (data - data_min) / (data_leap)
+            else:
+                data = np.zeros_like(data)
+            
+            if data.shape[-1] == 1:
+                data = np.squeeze(data, axis=-1)
+            out.append(torch.tensor(data))
 
         out = torch.stack(out)
         out_dict = {}
@@ -61,13 +66,18 @@ class BRATSDataset(torch.utils.data.Dataset):
             seg=np.load(path2)
             seg_max = np.max(seg)
             seg_min = np.min(seg)
-            normalized_seg = (seg - seg_min) / (seg_max - seg_min)
-            if normalized_seg.shape[-1] == 1:
-                normalized_seg = np.squeeze(normalized_seg, axis=-1)
+            seg_leap = seg_max - seg_min
+            if seg_leap > 1e-6:
+                seg = (seg - seg_min) / (seg_leap)
+            else:
+                seg = np.zeros_like(seg)
+
+            if seg.shape[-1] == 1:
+                seg = np.squeeze(seg, axis=-1)
             image = torch.zeros(4, 256, 256)
             image[:, 8:-8, 8:-8] = out
-            label = normalized_seg[None, ...]
-            if normalized_seg.max() > 0:
+            label = seg[None, ...]
+            if seg.max() > 0:
                 weak_label = 1
             else:
                 weak_label = 0
