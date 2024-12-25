@@ -107,7 +107,6 @@ def main():
     all_metrics = []
 
     for idx, img in enumerate(datal):
-
         model_kwargs = {}
      #   img = next(data)  # should return an image from the dataloader "data"
         print('img', img[0].shape, img[1])
@@ -249,7 +248,7 @@ def save_validation_results(sample, org, number, output_dir, dataset_type='brats
     if dataset_type == 'brats':
         os.makedirs(output_dir + f"/{number}", exist_ok=True)
         # Calculate difference map
-        diff = np.abs(org_np[0, :4, ...] - sample_np[0, ...]).sum(axis=0)
+        diff = np.abs(org_np[0, :5, ...] - sample_np[0, ...]).sum(axis=0)
         # Get segmentation mask (assuming it's in org_np[0, -1, ...])
         seg_mask = org_np[0, -1, ...]
         # Calculate dice between difference map and segmentation
