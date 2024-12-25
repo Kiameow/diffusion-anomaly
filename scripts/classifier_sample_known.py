@@ -107,6 +107,7 @@ def main():
     for img in datal:
 
         model_kwargs = {}
+        number
      #   img = next(data)  # should return an image from the dataloader "data"
         print('img', img[0].shape, img[1])
         if args.dataset=='brats':
@@ -179,7 +180,14 @@ def main():
             ]
             dist.all_gather(gathered_labels, classes)
             all_labels.extend([labels.cpu().numpy() for labels in gathered_labels])
-        
+
+        save_validation_results(
+            sample, 
+            org, 
+            number,  # Already defined in your code
+            output_dir="../validation_results",
+            dataset_type=args.dataset
+        )
 
     arr = np.concatenate(all_images, axis=0)
     arr = arr[: args.num_samples]
@@ -210,6 +218,48 @@ def create_argparser():
     parser = argparse.ArgumentParser()
     add_dict_to_argparser(parser, defaults)
     return parser
+
+def save_validation_results(sample, org, number, output_dir, dataset_type='brats'):
+    """Save validation results to disk"""
+    import os
+    import numpy as np
+    from PIL import Image
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Convert to numpy and normalize for visualization
+    sample_np = sample.cpu().numpy()
+    org_np = org.cpu().numpy()
+    
+    # Save original and generated samples
+    for i in range(sample_np.shape[1]):  # For each channel
+        # Save generated sample
+        sample_img = visualize(sample_np[0, i, ...])
+        Image.fromarray((sample_img * 255).astype(np.uint8)).save(
+            os.path.join(output_dir, f"{number}_sample_channel_{i}.png")
+        )
+        
+        # Save original
+        org_img = visualize(org_np[0, i, ...])
+        Image.fromarray((org_img * 255).astype(np.uint8)).save(
+            os.path.join(output_dir, f"{number}_original_channel_{i}.png")
+        )
+    
+    # Save difference map
+    if dataset_type == 'brats':
+        diff = np.abs(org_np[0, :4, ...] - sample_np[0, ...]).sum(axis=0)
+    else:  # chexpert
+        diff = np.abs(visualize(org_np[0, 0, ...]) - visualize(sample_np[0, 0, ...]))
+    
+    diff_img = visualize(diff)
+    Image.fromarray((diff_img * 255).astype(np.uint8)).save(
+        os.path.join(output_dir, f"{number}_difference.png")
+    )
+    
+    # Save raw arrays for further analysis
+    np.save(os.path.join(output_dir, f"{number}_sample.npy"), sample_np)
+    np.save(os.path.join(output_dir, f"{number}_original.npy"), org_np)
+    np.save(os.path.join(output_dir, f"{number}_difference.npy"), diff)
 
 if __name__ == "__main__":
     main()
