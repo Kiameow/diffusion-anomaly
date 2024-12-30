@@ -231,7 +231,7 @@ def create_argparser():
 def calculate_dice(pred, target):
     """Calculate Dice coefficient between prediction and target masks"""
     smooth = 1e-5
-    pred = pred > 0.5  # Convert difference map to binary mask with threshold
+    pred = pred > 0.12  # Convert difference map to binary mask with threshold
     target = target > 0  # Binary segmentation mask
     intersection = (pred & target).sum()
     return (2. * intersection + smooth) / (pred.sum() + target.sum() + smooth)
