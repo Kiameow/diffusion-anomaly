@@ -37,6 +37,8 @@ python scripts/classifier_sample_known.py  --data_dir path_to_testdata  --model_
 ```
 A visualization of the sampling process is done using [Visdom](https://github.com/fossasia/visdom).
 
+visualization part has been removed.
+
 
 ## Comparing Methods
 

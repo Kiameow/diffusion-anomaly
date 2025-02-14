@@ -40,8 +40,6 @@ def load_csv_file(filename: str, header_elements=None):
 
 
 from decimal import Decimal
-from visdom import Visdom
-viz = Visdom(port=8850)
 
 filename='../BRATS2020_npz/database.csv'
 with open(filename, newline='', encoding='utf-8-sig') as csvfile:
@@ -61,9 +59,4 @@ with open(filename, newline='', encoding='utf-8-sig') as csvfile:
             print('img', img.files)
             a=img['img']
             print('a', a.shape)
-            # viz.image(a[0, ...])
-            # viz.image(a[1, ...])
-            # viz.image(a[2, ...])
-            # viz.image(a[3, ...])
-            # viz.image(a[4, ...])
             numpy.save('../bratshalf/train/krank/'+row['fp'].split('/')[-1], a)

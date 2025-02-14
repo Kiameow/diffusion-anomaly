@@ -50,7 +50,6 @@ traceback2==1.4.0
 typing-extensions==4.0.1
 unittest2==1.1.0
 urllib3==1.26.7
-visdom==0.1.8.9
 websocket-client==1.2.3
 xmltodict==0.12.0
 

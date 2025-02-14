@@ -17,12 +17,7 @@ import torch.distributed as dist
 import torch.nn.functional as F
 from torch.nn.parallel.distributed import DistributedDataParallel as DDP
 from torch.optim import AdamW
-from visdom import Visdom
 import numpy as np
-viz = Visdom(port=8850)
-loss_window = viz.line( Y=th.zeros((1)).cpu(), X=th.zeros((1)).cpu(), opts=dict(xlabel='epoch', ylabel='Loss', title='classification loss'))
-val_window = viz.line( Y=th.zeros((1)).cpu(), X=th.zeros((1)).cpu(), opts=dict(xlabel='epoch', ylabel='Loss', title='validation loss'))
-acc_window= viz.line( Y=th.zeros((1)).cpu(), X=th.zeros((1)).cpu(), opts=dict(xlabel='epoch', ylabel='acc', title='accuracy'))
 
 from guided_diffusion import dist_util, logger
 from guided_diffusion.fp16_util import MixedPrecisionTrainer
@@ -151,12 +146,8 @@ def main():
 
             loss = loss.mean()
             if prefix=="train":
-                viz.line(X=th.ones((1, 1)).cpu() * step, Y=th.Tensor([loss]).unsqueeze(0).cpu(),
-                     win=loss_window, name='loss_cls',
-                     update='append')
-
+                pass
             else:
-
                 output_idx = logits[0].argmax()
                 print('outputidx', output_idx)
                 output_max = logits[0, output_idx]
@@ -164,9 +155,6 @@ def main():
                 output_max.backward()
                 saliency, _ = th.max(sub_batch.grad.data.abs(), dim=1)
                 print('saliency', saliency.shape)
-                viz.heatmap(visualize(saliency[0, ...]))
-                viz.image(visualize(sub_batch[0, 0,...]))
-                viz.image(visualize(sub_batch[0, 1, ...]))
                 th.cuda.empty_cache()
 
 
