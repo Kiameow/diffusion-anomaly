@@ -248,9 +248,9 @@ def save_model(mp_trainer, opt, step):
     if dist.get_rank() == 0:
         th.save(
             mp_trainer.master_params_to_state_dict(mp_trainer.master_params),
-            os.path.join(logger.get_dir(), f"model${args.dataset}class{step:06d}.pt"),
+            os.path.join(logger.get_dir(), f"model{args.dataset}class{step:06d}.pt"),
         )
-        th.save(opt.state_dict(), os.path.join(logger.get_dir(), f"opt${args.dataset}class{step:06d}.pt"))
+        th.save(opt.state_dict(), os.path.join(logger.get_dir(), f"opt{args.dataset}class{step:06d}.pt"))
 
 def compute_top_k(logits, labels, k, reduction="mean"):
     _, top_ks = th.topk(logits, k, dim=-1)
