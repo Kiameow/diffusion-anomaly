@@ -36,6 +36,8 @@ from guided_diffusion.train_util import parse_resume_step_from_filename, log_los
 
 def main():
     args = create_argparser().parse_args()
+    print(f"total_iteration: {args.iteration}")
+    print(f"save_interval: {args.save_interval}")
 
     dist_util.setup_dist()
     logger.configure()
