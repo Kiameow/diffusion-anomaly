@@ -1,7 +1,7 @@
 #!/bin/bash
 script_dir=$(dirname "$(readlink -f "$0")")
 echo "$script_dir"
-dataset_path="$script_dir/../data/opmed/training"
+dataset_path="$script_dir/../data/ideas/training"
 echo "$dataset_path"
 
 MODEL_FLAGS="--image_size 256 --num_channels 128 --class_cond True --num_res_blocks 2 --num_heads 1 --learn_sigma True --use_scale_shift_norm False --attention_resolutions 16"
@@ -13,4 +13,4 @@ SAMPLE_FLAGS="--batch_size 1 --num_samples 1 --timestep_respacing ddim1000 --use
 
 python scripts/image_train.py \
     --data_dir $dataset_path \
-    --dataset opmed $MODEL_FLAGS $DIFFUSION_FLAGS $TRAIN_FLAGS
+    --dataset ideas $MODEL_FLAGS $DIFFUSION_FLAGS $TRAIN_FLAGS

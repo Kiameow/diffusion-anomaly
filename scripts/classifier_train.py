@@ -282,7 +282,7 @@ def create_argparser():
         resume_checkpoint="",
         log_interval=1,
         eval_interval=1000,
-        save_interval=10,
+        save_interval=2000,
         dataset='brats'
     )
     defaults.update(classifier_and_diffusion_defaults())

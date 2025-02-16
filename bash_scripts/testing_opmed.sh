@@ -10,8 +10,8 @@ SAMPLE_FLAGS="--batch_size 1 --num_samples 1 --timestep_respacing ddim1000 --use
 
 python scripts/classifier_sample_known.py  \
     --data_dir $dataset_path  \
-    --model_path ./results/model.pt \
-    --classifier_path ./results/classifier.pt \
+    --model_path ./results/opmed-model.pt \
+    --classifier_path ./results/opmed-classifier.pt \
     --dataset opmed \
     --classifier_scale 100 \
     --noise_level 500 \
