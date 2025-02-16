@@ -15,5 +15,4 @@ python scripts/classifier_sample_known.py  \
     --dataset ideas \
     --classifier_scale 100 \
     --noise_level 500 \
-    --log_interval 100 \
     $MODEL_FLAGS $DIFFUSION_FLAGS $CLASSIFIER_FLAGS  $SAMPLE_FLAGS 
