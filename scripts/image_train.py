@@ -20,7 +20,6 @@ from guided_diffusion.train_util import TrainLoop
 
 def main():
     args = create_argparser().parse_args()
-    print(f"total_iterations: {args.iterations}")
     print(f"save_interval: {args.save_interval}")
 
     dist_util.setup_dist()
