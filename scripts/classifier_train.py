@@ -89,6 +89,26 @@ def main():
             class_cond=True,
         )
         print('dataset is chexpert')
+        
+    elif args.dataset == 'opmed':
+        data = load_data(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            image_size=args.image_size,
+            class_cond=True,
+            dataset_type="opmed"
+        )
+        print('dataset is opmed')
+        
+    elif args.dataset == 'ideas':
+        data = load_data(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            image_size=args.image_size,
+            class_cond=True,
+            dataset_type="ideas"
+        )
+        print('dataset is ideas')
 
 
 
@@ -115,6 +135,16 @@ def main():
             batch, extra = next(data_loader)
             labels = extra["y"].to(dist_util.dev())
             print('IS CHEXPERT')
+            
+        elif  args.dataset=='opmed':
+            batch, extra = next(data_loader)
+            labels = extra["y"].to(dist_util.dev())
+            print('IS OPMED')
+            
+        elif  args.dataset=='ideas':
+            batch, extra = next(data_loader)
+            labels = extra["y"].to(dist_util.dev())
+            print('IS IDEAS')
 
         print('labels', labels)
         batch = batch.to(dist_util.dev())
@@ -187,6 +217,7 @@ def main():
 
         mp_trainer.optimize(opt)
           
+        ## save model when global steps meet save_interval
         if not step % args.log_interval:
             logger.dumpkvs()
         if (
@@ -197,6 +228,7 @@ def main():
             logger.log("saving model...")
             save_model(mp_trainer, opt, step + resume_step)
 
+    ## when end of training iterations specified in arg, save model
     if dist.get_rank() == 0:
         logger.log("saving model...")
         save_model(mp_trainer, opt, step + resume_step)
@@ -210,12 +242,13 @@ def set_annealed_lr(opt, base_lr, frac_done):
 
 
 def save_model(mp_trainer, opt, step):
+    args = create_argparser().parse_args()
     if dist.get_rank() == 0:
         th.save(
             mp_trainer.master_params_to_state_dict(mp_trainer.master_params),
-            os.path.join(logger.get_dir(), f"modelbratsclass{step:06d}.pt"),
+            os.path.join(logger.get_dir(), f"model${args.dataset}class{step:06d}.pt"),
         )
-        th.save(opt.state_dict(), os.path.join(logger.get_dir(), f"optbratsclass{step:06d}.pt"))
+        th.save(opt.state_dict(), os.path.join(logger.get_dir(), f"opt${args.dataset}class{step:06d}.pt"))
 
 def compute_top_k(logits, labels, k, reduction="mean"):
     _, top_ks = th.topk(logits, k, dim=-1)
@@ -249,7 +282,7 @@ def create_argparser():
         resume_checkpoint="",
         log_interval=1,
         eval_interval=1000,
-        save_interval=5000,
+        save_interval=10,
         dataset='brats'
     )
     defaults.update(classifier_and_diffusion_defaults())

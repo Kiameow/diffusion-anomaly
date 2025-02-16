@@ -172,6 +172,12 @@ class TrainLoop:
             elif self.dataset=='chexpert':
                 batch, cond = next(self.datal)
                 cond.pop("path", None)
+            elif self.dataset=='opmed':
+                batch, cond = next(self.datal)
+                cond.pop("path", None)
+            elif self.dataset=='ideas':
+                batch, cond = next(self.datal)
+                cond.pop("path", None)
 
             self.run_step(batch, cond)
 
@@ -264,9 +270,9 @@ class TrainLoop:
             if dist.get_rank() == 0:
                 logger.log(f"saving model {rate}...")
                 if not rate:
-                    filename = f"brats2update{(self.step+self.resume_step):06d}.pt"
+                    filename = f"${self.dataset}2update{(self.step+self.resume_step):06d}.pt"
                 else:
-                    filename = f"emabrats2update_{rate}_{(self.step+self.resume_step):06d}.pt"
+                    filename = f"ema${self.dataset}2update_{rate}_{(self.step+self.resume_step):06d}.pt"
                 print('filename', filename)
                 with bf.BlobFile(bf.join(get_blob_logdir(), filename), "wb") as f:
                     th.save(state_dict, f)
@@ -277,7 +283,7 @@ class TrainLoop:
 
         if dist.get_rank() == 0:
             with bf.BlobFile(
-                bf.join(get_blob_logdir(), f"optbrats2update{(self.step+self.resume_step):06d}.pt"),
+                bf.join(get_blob_logdir(), f"opt${self.dataset}2update{(self.step+self.resume_step):06d}.pt"),
                 "wb",
             ) as f:
                 th.save(self.opt.state_dict(), f)

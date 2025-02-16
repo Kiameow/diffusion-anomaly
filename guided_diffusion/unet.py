@@ -655,13 +655,18 @@ class UNetModel(nn.Module):
             emb = emb + self.label_emb(y)
 
         h = x.type(self.dtype)
-        for module in self.input_blocks:
+        # print("initial input: ", h.shape)
+        for index, module in enumerate(self.input_blocks):
             h = module(h, emb)
+            # print(f"input layer {index} output: {h.shape}")
             hs.append(h)
         h = self.middle_block(h, emb)
-        for module in self.output_blocks:
+        # print(f"hidden layer output: {h.shape}")
+        for index, module in enumerate(self.output_blocks):
+            # print("hs.pop() shape:", hs[0].shape)
             h = th.cat([h, hs.pop()], dim=1)
             h = module(h, emb)
+            # print(f"output layer {index} output: {h.shape}")
         h = h.type(x.dtype)
         return self.out(h)
 
@@ -898,7 +903,7 @@ class EncoderUNetModel(nn.Module):
             h = module(h, emb)
             if self.pool.startswith("spatial"):
                 results.append(h.type(x.dtype).mean(dim=(2, 3)))
-        h = self.middle_block(h, emb
+        h = self.middle_block(h, emb)
     
         if self.pool.startswith("spatial"):
             results.append(h.type(x.dtype).mean(dim=(2, 3)))

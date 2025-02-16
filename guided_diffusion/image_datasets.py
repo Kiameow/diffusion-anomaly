@@ -20,6 +20,7 @@ def load_data(
     deterministic=False,
     random_crop=False,
     random_flip=False,
+    dataset_type=None
 ):
     """
     For a dataset, create a generator over (images, kwargs) pairs.
@@ -41,6 +42,7 @@ def load_data(
     """
     if not data_dir:
         raise ValueError("unspecified data directory")
+    ## get all the image file paths
     all_files = _list_image_files_recursively(data_dir)
 
     classes = None
@@ -48,12 +50,15 @@ def load_data(
     if class_cond:
         # Assume classes are the first part of the filename,
         # before an underscore.
-
-        class_names =[path.split("/")[3] for path in all_files] #9 or 3
-        print('classnames', class_names)
+        if dataset_type == "opmed" or dataset_type == "ideas":
+            class_names = [path.split("/")[-2] for path in all_files]
+        else:
+            class_names =[path.split("/")[3] for path in all_files] #9 or 3
+        print('classnames', class_names[0])
 
 
         sorted_classes = {x: i for i, x in enumerate(sorted(set(class_names)))}
+        ## classes has dataset length labels
         classes = [sorted_classes[x] for x in class_names]
 
     dataset = ImageDataset(
@@ -118,10 +123,14 @@ class ImageDataset(Dataset):
     def __getitem__(self, idx):
         path = self.local_images[idx]
         name=str(path).split("/")[-1].split(".")[0]
-        print('path', name)
+        ext=str(path).split("/")[-1].split(".")[1]
+        # print(path)
 
-
-        numpy_img = np.load(path)
+        if ext in ['png', 'jpg']:
+            img = Image.open(path).convert('L')
+            numpy_img = np.array(img)
+        else:
+            numpy_img = np.load(path)
         arr = visualize(numpy_img).astype(np.float32)
 
         out_dict = {}
@@ -129,6 +138,11 @@ class ImageDataset(Dataset):
             out_dict["y"] = np.array(self.local_classes[idx], dtype=np.int64)
             out_dict["path"]=name
 
+        if len(arr.shape) == 2:
+            arr = np.reshape(arr, (arr.shape[0], arr.shape[1], 1))
+        elif len(arr.shape) > 3:
+            raise TypeError("image should be HWC")      
+        # print(arr.shape)
         return np.transpose(arr, [2, 0, 1]), out_dict
 
 

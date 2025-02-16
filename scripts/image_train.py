@@ -49,7 +49,24 @@ def main():
             class_cond=True,
         )
         print('dataset is chexpert')
-
+    elif args.dataset == 'opmed':
+        datal = load_data(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            image_size=args.image_size,
+            class_cond=True,
+            dataset_type="opmed",
+            deterministic=True
+        )
+    elif args.dataset == 'ideas':
+        datal = load_data(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            image_size=args.image_size,
+            class_cond=True,
+            dataset_type="ideas"
+        )
+        
     logger.log("training...")
     TrainLoop(
         model=model,
