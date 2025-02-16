@@ -196,7 +196,7 @@ def main():
                 number = os.path.splitext(os.path.basename(path))[0]
 
             # 创建样本子目录
-            sample_dir = os.path.join(args.output_dir, f"sample_{number}_i{i}")
+            sample_dir = os.path.join(args.output_dir, f"{img[1]['y'][i]}_sample_{number}_i{i}")
             os.makedirs(sample_dir, exist_ok=True)
 
             # 提取单个样本数据
