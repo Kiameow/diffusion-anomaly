@@ -13,4 +13,5 @@ SAMPLE_FLAGS="--batch_size 1 --num_samples 1 --timestep_respacing ddim1000 --use
 
 python scripts/image_train.py \
     --data_dir $dataset_path \
+    --log_interval 100 \
     --dataset ideas $MODEL_FLAGS $DIFFUSION_FLAGS $TRAIN_FLAGS
