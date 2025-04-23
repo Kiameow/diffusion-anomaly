@@ -711,6 +711,8 @@ class GaussianDiffusion:
 
         if cond_fn is not None:
             out, saliency = self.condition_score2(cond_fn, out, x, t, model_kwargs=model_kwargs)
+        else:
+            saliency = None
         # Usually our model outputs epsilon, but we re-derive it
         # in case we used x_start or x_prev prediction.
         eps = self._predict_eps_from_xstart(x, t, out["pred_xstart"])
@@ -790,6 +792,7 @@ class GaussianDiffusion:
         device=None,
         progress=False,
     ):
+        print("ddim_sample_loop_inter")
         if device is None:
             device = next(model.parameters()).device
         assert isinstance(shape, (tuple, list))
@@ -835,12 +838,13 @@ class GaussianDiffusion:
 
         Same usage as p_sample_loop().
         """
+        print("ddim_sample_loop")
         final = None
         if device is None:
             device = next(model.parameters()).device
         assert isinstance(shape, (tuple, list))
         b = shape[0]
-        t = th.randint(0,1, (b,), device=device).long().to(device)
+        t = th.randint(20,1000, (b,), device=device).long().to(device)
         for sample in self.ddim_sample_loop_progressive(
             model,
             shape,
@@ -879,6 +883,7 @@ class GaussianDiffusion:
             classifier=None,
             eta = 0.0
     ):
+        print("ddim_sample_loop_known")
         if device is None:
             device = next(model.parameters()).device
         assert isinstance(shape, (tuple, list))
@@ -938,6 +943,7 @@ class GaussianDiffusion:
             img = noise
         else:
             img = th.randn(*shape, device=device)
+        print(time, type(time))
         indices = list(range(time-1))[::-1]
         print('indices', indices)
 
